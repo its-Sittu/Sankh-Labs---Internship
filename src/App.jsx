@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Phone, Calendar, ClipboardList, CalendarClock, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, Phone, Calendar, ClipboardList, CalendarClock, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 function App() {
   const [leads, setLeads] = useState(() => {
@@ -14,26 +14,86 @@ function App() {
     followUpDate: ''
   });
 
+  const [errors, setErrors] = useState({});
+  const [showSuccess, setShowSuccess] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('leads', JSON.stringify(leads));
   }, [leads]);
 
+  const validateField = (name, value) => {
+    let error = '';
+    
+    switch (name) {
+      case 'name':
+        if (!value.trim()) {
+          error = 'Full name is required';
+        } else if (value.trim().length < 3) {
+          error = 'Name must be at least 3 characters';
+        }
+        break;
+      case 'phone':
+        const phoneDigits = value.replace(/\D/g, '');
+        if (!value.trim()) {
+          error = 'Phone number is required';
+        } else if (!/^\d+$/.test(value)) {
+          error = 'Phone number must contain only digits';
+        } else if (value.length !== 10) {
+          error = 'Phone number must be exactly 10 digits';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error === '';
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.name.trim().length >= 3 &&
+      formData.phone.length === 10 &&
+      /^\d+$/.test(formData.phone) &&
+      Object.values(errors).every(err => !err)
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
+    
+    // Final validation and sanitization
+    const isNameValid = validateField('name', formData.name);
+    const isPhoneValid = validateField('phone', formData.phone);
+
+    if (!isNameValid || !isPhoneValid) return;
+
+    const sanitizedData = {
+      name: formData.name.trim(),
+      phone: formData.phone.trim(),
+      note: formData.note.trim(),
+      followUpDate: formData.followUpDate
+    };
 
     const newLead = {
       id: crypto.randomUUID(),
-      ...formData,
+      ...sanitizedData,
       createdAt: new Date().toISOString()
     };
 
     setLeads([...leads, newLead]);
     setFormData({ name: '', phone: '', note: '', followUpDate: '' });
+    setErrors({});
+    
+    // Show success feedback
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validateField(name, value);
   };
 
   // Helper to format date
@@ -49,9 +109,6 @@ function App() {
   // Determine if a follow-up is today
   const isToday = (dateString) => {
     if (!dateString) return false;
-    // Need to handle timezone accurately so it compares correctly
-    const date = new Date(dateString);
-    // When date is created from "YYYY-MM-DD" it's UTC time. We can just extract the components
     const [year, month, day] = dateString.split('-');
     const today = new Date();
     return parseInt(year) === today.getFullYear() &&
@@ -82,6 +139,13 @@ function App() {
       <aside className="sidebar">
         <div className="card">
           <h2 className="card-title"><UserPlus size={20} /> Add New Lead</h2>
+          
+          {showSuccess && (
+            <div className="success-message">
+              <CheckCircle2 size={18} /> Lead added successfully!
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="name">Full Name *</label>
@@ -89,12 +153,17 @@ function App() {
                 type="text"
                 id="name"
                 name="name"
-                className="form-input"
+                className={`form-input ${errors.name ? 'invalid' : ''}`}
                 placeholder="e.g. Jane Doe"
                 value={formData.name}
                 onChange={handleChange}
-                required
+                onBlur={(e) => validateField('name', e.target.value)}
               />
+              {errors.name && (
+                <span className="error-message">
+                  <AlertCircle size={12} /> {errors.name}
+                </span>
+              )}
             </div>
             
             <div className="form-group">
@@ -103,12 +172,17 @@ function App() {
                 type="tel"
                 id="phone"
                 name="phone"
-                className="form-input"
-                placeholder="e.g. +1 (555) 123-4567"
+                className={`form-input ${errors.phone ? 'invalid' : ''}`}
+                placeholder="10-digit mobile number"
                 value={formData.phone}
                 onChange={handleChange}
-                required
+                onBlur={(e) => validateField('phone', e.target.value)}
               />
+              {errors.phone && (
+                <span className="error-message">
+                  <AlertCircle size={12} /> {errors.phone}
+                </span>
+              )}
             </div>
             
             <div className="form-group">
@@ -136,7 +210,11 @@ function App() {
               ></textarea>
             </div>
             
-            <button type="submit" className="btn">
+            <button 
+              type="submit" 
+              className="btn"
+              disabled={!isFormValid()}
+            >
               Add Lead
             </button>
           </form>
