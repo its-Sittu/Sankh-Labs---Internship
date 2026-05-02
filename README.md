@@ -1,16 +1,74 @@
-# React + Vite
+# Lead Management Dashboard 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A professional, high-performance Lead Management Dashboard built with **React** and **Vite**. This application is designed to help businesses efficiently capture, track, and manage leads while ensuring maximum data integrity through robust validation systems.
 
-Currently, two official plugins are available:
+## ✨ Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Dynamic Lead Tracking**: Add and view leads instantly with a clean, intuitive interface.
+- **Intelligent Follow-up Dashboard**: 
+  - **Today's Follow-ups**: Automatically highlights leads scheduled for the current day.
+  - **Categorized Sections**: Separate views for upcoming and past follow-ups.
+- **Robust Form Validation (Real-time)**:
+  - **Smart Validation**: Instant visual feedback as you type (`onChange`) and when you leave a field (`onBlur`).
+  - **Visual Indicators**: Invalid fields are highlighted with red borders and descriptive error messages.
+  - **Button Guard**: Submit button remains disabled until all required fields meet validation criteria.
+- **Data Integrity**: 
+  - **Automatic Sanitization**: Trims whitespace from all inputs before saving.
+  - **10-Digit Mobile Validation**: Ensures phone numbers are exactly 10 digits and numeric only.
+- **Premium UI/UX**:
+  - Modern, responsive design optimized for all screen sizes.
+  - Smooth micro-animations and transitions.
+  - Semantic iconography using **Lucide React**.
 
-## React Compiler
+## 🛠️ Validation Rules
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Field | Rule | Error Message |
+|-------|------|---------------|
+| **Full Name** | Required, min 3 characters | *Name must be at least 3 characters* |
+| **Phone Number** | Required, exactly 10 numeric digits | *Phone number must be exactly 10 digits* |
 
-## Expanding the ESLint configuration
+## 🚀 Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend**: React.js
+- **Build Tool**: Vite
+- **Styling**: Vanilla CSS3 (Custom Design System)
+- **Icons**: Lucide React
+- **State Management**: React Hooks (`useState`, `useEffect`)
+- **Persistence**: LocalStorage
+
+## 🏁 Getting Started
+
+### Prerequisites
+- Node.js (v16.x or higher)
+- npm or yarn
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/its-Sittu/Sankh-Labs---Internship.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd "Skill Labs"
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## 📂 Project Structure
+
+```text
+src/
+├── App.jsx        # Main application logic & state management
+├── App.css        # Specific component styles
+├── index.css      # Global design system & validation styles
+└── assets/        # Static assets and images
+```
+
+---
+*Developed as part of the Skill Labs Internship Program.*
