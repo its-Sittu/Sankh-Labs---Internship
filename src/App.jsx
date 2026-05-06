@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Phone, Calendar, ClipboardList, CalendarClock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Users, UserPlus, Phone, Mail, Calendar, ClipboardList, CalendarClock, AlertCircle, CheckCircle2, Sun, Moon } from 'lucide-react';
 
 function App() {
   const [leads, setLeads] = useState(() => {
@@ -9,6 +9,7 @@ function App() {
 
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     note: '',
     followUpDate: ''
@@ -17,9 +18,26 @@ function App() {
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved !== null) {
+      return saved === 'dark';
+    }
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
   useEffect(() => {
     localStorage.setItem('leads', JSON.stringify(leads));
   }, [leads]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
+      document.body.classList.remove('light-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
+  }, [isDarkMode]);
 
   const validateField = (name, value) => {
     let error = '';
@@ -27,19 +45,36 @@ function App() {
     switch (name) {
       case 'name':
         if (!value.trim()) {
-          error = 'Full name is required';
-        } else if (value.trim().length < 3) {
-          error = 'Name must be at least 3 characters';
+          error = 'This field is required';
+        }
+        break;
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value.trim()) {
+          error = 'This field is required';
+        } else if (!emailRegex.test(value.trim())) {
+          error = 'Enter a valid email address';
         }
         break;
       case 'phone':
-        const phoneDigits = value.replace(/\D/g, '');
         if (!value.trim()) {
-          error = 'Phone number is required';
-        } else if (!/^\d+$/.test(value)) {
-          error = 'Phone number must contain only digits';
-        } else if (value.length !== 10) {
-          error = 'Phone number must be exactly 10 digits';
+          error = 'This field is required';
+        } else if (!/^\d{10}$/.test(value.trim())) {
+          error = 'Enter a valid 10-digit phone number';
+        }
+        break;
+      case 'followUpDate':
+        if (!value) {
+          error = 'This field is required';
+        } else {
+          const [year, month, day] = value.split('-');
+          const selectedDate = new Date(year, month - 1, day);
+          selectedDate.setHours(0, 0, 0, 0);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (selectedDate < today) {
+            error = 'Past dates are not allowed';
+          }
         }
         break;
       default:
@@ -51,12 +86,21 @@ function App() {
   };
 
   const isFormValid = () => {
-    return (
-      formData.name.trim().length >= 3 &&
-      formData.phone.length === 10 &&
-      /^\d+$/.test(formData.phone) &&
-      Object.values(errors).every(err => !err)
-    );
+    const isNameValid = formData.name.trim().length > 0;
+    const isPhoneValid = /^\d{10}$/.test(formData.phone.trim());
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
+    
+    let isDateValid = false;
+    if (formData.followUpDate) {
+      const [year, month, day] = formData.followUpDate.split('-');
+      const selectedDate = new Date(year, month - 1, day);
+      selectedDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      isDateValid = selectedDate >= today;
+    }
+
+    return isNameValid && isPhoneValid && isEmailValid && isDateValid && Object.values(errors).every(err => !err);
   };
 
   const handleSubmit = (e) => {
@@ -64,12 +108,15 @@ function App() {
     
     // Final validation and sanitization
     const isNameValid = validateField('name', formData.name);
+    const isEmailValid = validateField('email', formData.email);
     const isPhoneValid = validateField('phone', formData.phone);
+    const isDateValid = validateField('followUpDate', formData.followUpDate);
 
-    if (!isNameValid || !isPhoneValid) return;
+    if (!isNameValid || !isEmailValid || !isPhoneValid || !isDateValid) return;
 
     const sanitizedData = {
       name: formData.name.trim(),
+      email: formData.email.trim(),
       phone: formData.phone.trim(),
       note: formData.note.trim(),
       followUpDate: formData.followUpDate
@@ -82,7 +129,7 @@ function App() {
     };
 
     setLeads([...leads, newLead]);
-    setFormData({ name: '', phone: '', note: '', followUpDate: '' });
+    setFormData({ name: '', email: '', phone: '', note: '', followUpDate: '' });
     setErrors({});
     
     // Show success feedback
@@ -134,6 +181,13 @@ function App() {
     <div className="container">
       <div className="header">
         <h1><Users className="text-primary" /> Lead Management Dashboard</h1>
+        <button 
+          onClick={() => setIsDarkMode(!isDarkMode)} 
+          className="theme-toggle"
+          aria-label="Toggle theme"
+        >
+          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
       </div>
 
       <aside className="sidebar">
@@ -153,7 +207,7 @@ function App() {
                 type="text"
                 id="name"
                 name="name"
-                className={`form-input ${errors.name ? 'invalid' : ''}`}
+                className={`form-input ${errors.name ? 'invalid' : ''} ${!errors.name && formData.name ? 'valid' : ''}`}
                 placeholder="e.g. Jane Doe"
                 value={formData.name}
                 onChange={handleChange}
@@ -167,12 +221,31 @@ function App() {
             </div>
             
             <div className="form-group">
+              <label htmlFor="email">Email Address *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className={`form-input ${errors.email ? 'invalid' : ''} ${!errors.email && formData.email ? 'valid' : ''}`}
+                placeholder="e.g. jane@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={(e) => validateField('email', e.target.value)}
+              />
+              {errors.email && (
+                <span className="error-message">
+                  <AlertCircle size={12} /> {errors.email}
+                </span>
+              )}
+            </div>
+
+            <div className="form-group">
               <label htmlFor="phone">Phone Number *</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
-                className={`form-input ${errors.phone ? 'invalid' : ''}`}
+                className={`form-input ${errors.phone ? 'invalid' : ''} ${!errors.phone && formData.phone ? 'valid' : ''}`}
                 placeholder="10-digit mobile number"
                 value={formData.phone}
                 onChange={handleChange}
@@ -186,15 +259,21 @@ function App() {
             </div>
             
             <div className="form-group">
-              <label htmlFor="followUpDate">Follow-up Date</label>
+              <label htmlFor="followUpDate">Follow-up Date *</label>
               <input
                 type="date"
                 id="followUpDate"
                 name="followUpDate"
-                className="form-input"
+                className={`form-input ${errors.followUpDate ? 'invalid' : ''} ${!errors.followUpDate && formData.followUpDate ? 'valid' : ''}`}
                 value={formData.followUpDate}
                 onChange={handleChange}
+                onBlur={(e) => validateField('followUpDate', e.target.value)}
               />
+              {errors.followUpDate && (
+                <span className="error-message">
+                  <AlertCircle size={12} /> {errors.followUpDate}
+                </span>
+              )}
             </div>
             
             <div className="form-group">
@@ -250,6 +329,11 @@ function App() {
                   <div className="lead-phone">
                     <Phone size={14} /> {lead.phone}
                   </div>
+                  {lead.email && (
+                    <div className="lead-phone" style={{ marginTop: '-4px' }}>
+                      <Mail size={14} /> {lead.email}
+                    </div>
+                  )}
                   {lead.note && (
                     <div className="lead-note">{lead.note}</div>
                   )}
@@ -266,7 +350,7 @@ function App() {
               <ClipboardList size={22} /> 
               All Other Leads
             </h2>
-            <span className="badge" style={{ background: 'var(--bg-color)' }}>{otherLeads.length}</span>
+            <span className="badge">{otherLeads.length}</span>
           </div>
           
           {otherLeads.length === 0 ? (
@@ -293,6 +377,11 @@ function App() {
                     <div className="lead-phone">
                       <Phone size={14} /> {lead.phone}
                     </div>
+                    {lead.email && (
+                      <div className="lead-phone" style={{ marginTop: '-4px' }}>
+                        <Mail size={14} /> {lead.email}
+                      </div>
+                    )}
                     {lead.note && (
                       <div className="lead-note">{lead.note}</div>
                     )}
