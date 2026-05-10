@@ -313,3 +313,6 @@
 
 /* Feature 44 */
 .rounded-md { border-radius: 0.375rem; }
+
+/* Feature 45 */
+.rounded-lg { border-radius: 0.5rem; }
