@@ -221,3 +221,6 @@
 
 /* Feature 13 */
 .font-bold { font-weight: bold; }
+
+/* Feature 14 */
+.font-semibold { font-weight: 600; }
