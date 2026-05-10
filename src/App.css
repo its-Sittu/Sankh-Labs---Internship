@@ -310,3 +310,6 @@
 
 /* Feature 43 */
 .rounded-sm { border-radius: 0.125rem; }
+
+/* Feature 44 */
+.rounded-md { border-radius: 0.375rem; }
