@@ -227,3 +227,6 @@
 
 /* Feature 15 */
 .font-light { font-weight: 300; }
+
+/* Feature 16 */
+.text-sm { font-size: 0.875rem; }
