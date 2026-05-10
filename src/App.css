@@ -328,3 +328,6 @@
 
 /* Feature 49 */
 .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+/* Feature 50 */
+.opacity-50 { opacity: 0.5; }
