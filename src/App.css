@@ -224,3 +224,6 @@
 
 /* Feature 14 */
 .font-semibold { font-weight: 600; }
+
+/* Feature 15 */
+.font-light { font-weight: 300; }
