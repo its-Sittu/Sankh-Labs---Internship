@@ -185,3 +185,6 @@
 
 /* Feature 1 */
 .flex-center { display: flex; align-items: center; justify-content: center; }
+
+/* Feature 2 */
+.flex-col { display: flex; flex-direction: column; }
