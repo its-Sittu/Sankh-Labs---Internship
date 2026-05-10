@@ -200,3 +200,6 @@
 
 /* Feature 6 */
 .justify-center { justify-content: center; }
+
+/* Feature 7 */
+.justify-between { justify-content: space-between; }
