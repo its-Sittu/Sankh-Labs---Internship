@@ -316,3 +316,6 @@
 
 /* Feature 45 */
 .rounded-lg { border-radius: 0.5rem; }
+
+/* Feature 46 */
+.rounded-full { border-radius: 9999px; }
