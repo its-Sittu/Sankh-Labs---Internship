@@ -194,3 +194,6 @@
 
 /* Feature 4 */
 .flex-wrap { flex-wrap: wrap; }
+
+/* Feature 5 */
+.items-center { align-items: center; }
