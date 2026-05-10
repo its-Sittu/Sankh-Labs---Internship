@@ -182,3 +182,6 @@
     border-right-color: var(--border);
   }
 }
+
+/* Feature 1 */
+.flex-center { display: flex; align-items: center; justify-content: center; }
