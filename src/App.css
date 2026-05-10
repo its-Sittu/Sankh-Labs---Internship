@@ -203,3 +203,6 @@
 
 /* Feature 7 */
 .justify-between { justify-content: space-between; }
+
+/* Feature 8 */
+.w-full { width: 100%; }
