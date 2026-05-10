@@ -191,3 +191,6 @@
 
 /* Feature 3 */
 .flex-row { display: flex; flex-direction: row; }
+
+/* Feature 4 */
+.flex-wrap { flex-wrap: wrap; }
