@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Phone, Mail, Calendar, ClipboardList, CalendarClock, AlertCircle, CheckCircle2, Sun, Moon } from 'lucide-react';
+import { Users, UserPlus, Phone, Mail, Calendar, ClipboardList, CalendarClock, AlertCircle, CheckCircle2, Sun, Moon, Edit2, Trash2 } from 'lucide-react';
 
 function App() {
   const [leads, setLeads] = useState(() => {
@@ -12,9 +12,11 @@ function App() {
     email: '',
     phone: '',
     note: '',
-    followUpDate: ''
+    followUpDate: '',
+    status: 'Interested'
   });
 
+  const [editingLeadId, setEditingLeadId] = useState(null);
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -119,17 +121,23 @@ function App() {
       email: formData.email.trim(),
       phone: formData.phone.trim(),
       note: formData.note.trim(),
-      followUpDate: formData.followUpDate
+      followUpDate: formData.followUpDate,
+      status: formData.status || 'Interested'
     };
 
-    const newLead = {
-      id: crypto.randomUUID(),
-      ...sanitizedData,
-      createdAt: new Date().toISOString()
-    };
+    if (editingLeadId) {
+      setLeads(leads.map(lead => lead.id === editingLeadId ? { ...lead, ...sanitizedData } : lead));
+      setEditingLeadId(null);
+    } else {
+      const newLead = {
+        id: crypto.randomUUID(),
+        ...sanitizedData,
+        createdAt: new Date().toISOString()
+      };
+      setLeads([...leads, newLead]);
+    }
 
-    setLeads([...leads, newLead]);
-    setFormData({ name: '', email: '', phone: '', note: '', followUpDate: '' });
+    setFormData({ name: '', email: '', phone: '', note: '', followUpDate: '', status: 'Interested' });
     setErrors({});
     
     // Show success feedback
@@ -137,10 +145,40 @@ function App() {
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
+  const handleEdit = (lead) => {
+    setEditingLeadId(lead.id);
+    setFormData({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      note: lead.note || '',
+      followUpDate: lead.followUpDate || '',
+      status: lead.status || 'Interested'
+    });
+    setErrors({});
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this lead?')) {
+      setLeads(leads.filter(lead => lead.id !== id));
+      if (editingLeadId === id) {
+        setEditingLeadId(null);
+        setFormData({ name: '', email: '', phone: '', note: '', followUpDate: '', status: 'Interested' });
+      }
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     validateField(name, value);
+  };
+
+  const cancelEdit = () => {
+    setEditingLeadId(null);
+    setFormData({ name: '', email: '', phone: '', note: '', followUpDate: '', status: 'Interested' });
+    setErrors({});
   };
 
   // Helper to format date
@@ -192,11 +230,13 @@ function App() {
 
       <aside className="sidebar">
         <div className="card">
-          <h2 className="card-title"><UserPlus size={20} /> Add New Lead</h2>
+          <h2 className="card-title">
+            <UserPlus size={20} /> {editingLeadId ? 'Update Lead' : 'Add New Lead'}
+          </h2>
           
           {showSuccess && (
             <div className="success-message">
-              <CheckCircle2 size={18} /> Lead added successfully!
+              <CheckCircle2 size={18} /> {editingLeadId ? 'Lead updated successfully!' : 'Lead added successfully!'}
             </div>
           )}
 
@@ -259,6 +299,21 @@ function App() {
             </div>
             
             <div className="form-group">
+              <label htmlFor="status">Status</label>
+              <select
+                id="status"
+                name="status"
+                className="form-input"
+                value={formData.status}
+                onChange={handleChange}
+              >
+                <option value="Interested">Interested</option>
+                <option value="Not Interested">Not Interested</option>
+                <option value="Converted">Converted</option>
+              </select>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="followUpDate">Follow-up Date *</label>
               <input
                 type="date"
@@ -289,13 +344,27 @@ function App() {
               ></textarea>
             </div>
             
-            <button 
-              type="submit" 
-              className="btn"
-              disabled={!isFormValid()}
-            >
-              Add Lead
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                type="submit" 
+                className="btn"
+                style={{ flex: 1 }}
+                disabled={!isFormValid()}
+              >
+                {editingLeadId ? 'Update Lead' : 'Add Lead'}
+              </button>
+              
+              {editingLeadId && (
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  style={{ flex: 1, background: 'var(--item-bg)', color: 'var(--text-primary)', border: '1px solid var(--border)', boxShadow: 'none' }}
+                  onClick={cancelEdit}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </aside>
@@ -321,9 +390,16 @@ function App() {
               {todaysFollowUps.map(lead => (
                 <div key={lead.id} className="lead-item">
                   <div className="lead-header">
-                    <div className="lead-name">{lead.name}</div>
-                    <div className="badge today">
-                      <Calendar size={12} /> Today
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div className="lead-name">{lead.name}</div>
+                      {lead.status && <span className={`badge-status status-${lead.status.replace(/\s+/g, '-').toLowerCase()}`}>{lead.status}</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div className="badge today">
+                        <Calendar size={12} /> Today
+                      </div>
+                      <button className="icon-btn edit-btn" onClick={() => handleEdit(lead)} title="Edit"><Edit2 size={16} /></button>
+                      <button className="icon-btn delete-btn" onClick={() => handleDelete(lead.id)} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </div>
                   <div className="lead-phone">
@@ -365,14 +441,21 @@ function App() {
                 const upcoming = lead.followUpDate && !past && !isToday(lead.followUpDate);
                 
                 return (
-                  <div key={lead.id} className="lead-item">
+                  <div key={lead.id} className={`lead-item ${past ? 'row-overdue' : ''}`}>
                     <div className="lead-header">
-                      <div className="lead-name">{lead.name}</div>
-                      {lead.followUpDate && (
-                        <div className={`badge ${past ? 'past' : 'upcoming'}`}>
-                          <Calendar size={12} /> {formatDate(lead.followUpDate)}
-                        </div>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="lead-name">{lead.name}</div>
+                        {lead.status && <span className={`badge-status status-${lead.status.replace(/\s+/g, '-').toLowerCase()}`}>{lead.status}</span>}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {lead.followUpDate && (
+                          <div className={`badge ${past ? 'past' : 'upcoming'}`}>
+                            <Calendar size={12} /> {formatDate(lead.followUpDate)}
+                          </div>
+                        )}
+                        <button className="icon-btn edit-btn" onClick={() => handleEdit(lead)} title="Edit"><Edit2 size={16} /></button>
+                        <button className="icon-btn delete-btn" onClick={() => handleDelete(lead.id)} title="Delete"><Trash2 size={16} /></button>
+                      </div>
                     </div>
                     <div className="lead-phone">
                       <Phone size={14} /> {lead.phone}
