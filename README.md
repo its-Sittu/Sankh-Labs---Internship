@@ -1,45 +1,68 @@
 # Lead Management Dashboard 🚀
 
-A professional, high-performance Lead Management Dashboard built with **React** and **Vite**. This application is designed to help businesses efficiently capture, track, and manage leads while ensuring maximum data integrity through robust validation systems.
+A professional, high-performance **Lead Management CRM** built with **React** and **Vite**. This application is designed to help businesses efficiently capture, track, and manage their sales pipeline with an intuitive, glassmorphism-inspired dark mode interface.
 
-## ✨ Key Features
+![Dashboard Preview](./public/dashboard-bg.png)
 
-- **Dynamic Lead Tracking**: Add and view leads instantly with a clean, intuitive interface.
-- **Intelligent Follow-up Dashboard**: 
-  - **Today's Follow-ups**: Automatically highlights leads scheduled for the current day.
-  - **Categorized Sections**: Separate views for upcoming and past follow-ups.
+## ✨ Core CRM Features
+
+- **Full CRUD Operations**:
+  - Add new leads instantly.
+  - Edit existing lead information dynamically.
+  - Delete outdated or invalid leads effortlessly.
+- **Lead Status Management**: 
+  - Track the sales funnel using color-coded statuses: **Interested**, **Not Interested**, and **Converted**.
+- **Intelligent Follow-up Tracking**: 
+  - **Today's Follow-ups**: Dedicated section highlighting leads scheduled for the current day.
+  - **Overdue Highlights**: Visually alerts you with a subtle red highlight if a lead's follow-up date has passed.
 - **Robust Form Validation (Real-time)**:
-  - **Smart Validation**: Instant visual feedback as you type (`onChange`) and when you leave a field (`onBlur`).
-  - **Visual Indicators**: Invalid fields are highlighted with red borders and descriptive error messages.
-  - **Button Guard**: Submit button remains disabled until all required fields meet validation criteria.
-- **Data Integrity**: 
-  - **Automatic Sanitization**: Trims whitespace from all inputs before saving.
-  - **10-Digit Mobile Validation**: Ensures phone numbers are exactly 10 digits and numeric only.
-- **Premium UI/UX**:
-  - Modern, responsive design optimized for all screen sizes.
-  - Smooth micro-animations and transitions.
-  - Semantic iconography using **Lucide React**.
+  - Smart validation ensuring clean data (e.g., 10-digit mobile numbers, proper email formats).
+  - Submit buttons remain disabled until the form is completely valid.
 
-## 🛠️ Validation Rules
+## 🎨 Premium UI/UX Aesthetics
 
-| Field | Rule | Error Message |
-|-------|------|---------------|
-| **Full Name** | Required, min 3 characters | *Name must be at least 3 characters* |
-| **Phone Number** | Required, exactly 10 numeric digits | *Phone number must be exactly 10 digits* |
+- **Custom Glassmorphism Design**: Semi-transparent, blur-backed cards layered over a deep navy blue abstract background.
+- **Micro-Animations**: Smooth, bouncy hover effects (`cubic-bezier`) that make cards and buttons physically lift off the page.
+- **Theme Support**: Integrated dark/light mode toggle adapting to user preferences.
+
+## 🔄 CRM Workflow Architecture
+
+The following flowchart outlines the lifecycle of a lead within this application:
+
+```mermaid
+graph TD
+    A[New Lead Arrives] --> B(Fill Lead Form)
+    B --> C{Form Valid?}
+    C -- No --> D[Show Validation Errors]
+    C -- Yes --> E[Save Lead to Database]
+    E --> F[Lead List Dashboard]
+    
+    F --> G{Action Required?}
+    G -- "Needs Update" --> H(Edit Lead)
+    H --> E
+    
+    G -- "Follow-up Overdue" --> I(Highlighted Red visually)
+    I --> H
+    
+    G -- "Status Change" --> J(Update Status)
+    J --> K[Interested / Not Interested / Converted]
+    
+    G -- "Invalid/Spam" --> L(Delete Lead)
+```
 
 ## 🚀 Tech Stack
 
-- **Frontend**: React.js
+- **Frontend**: React.js 19
 - **Build Tool**: Vite
-- **Styling**: Vanilla CSS3 (Custom Design System)
+- **Styling**: Vanilla CSS3 (Custom Glassmorphism System)
 - **Icons**: Lucide React
 - **State Management**: React Hooks (`useState`, `useEffect`)
-- **Persistence**: LocalStorage
+- **Persistence**: LocalStorage (Currently architected for easy backend migration)
 
 ## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js (v16.x or higher)
+- Node.js (v18.x or higher recommended)
 - npm or yarn
 
 ### Installation
@@ -60,15 +83,5 @@ A professional, high-performance Lead Management Dashboard built with **React** 
    npm run dev
    ```
 
-## 📂 Project Structure
-
-```text
-src/
-├── App.jsx        # Main application logic & state management
-├── App.css        # Specific component styles
-├── index.css      # Global design system & validation styles
-└── assets/        # Static assets and images
-```
-
 ---
-*Developed as part of the Skill Labs Internship Program.*
+*Built with ❤️ focusing on seamless user experience and modern web standards.*
